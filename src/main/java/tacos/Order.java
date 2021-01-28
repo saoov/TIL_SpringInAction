@@ -1,8 +1,18 @@
 package tacos;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -11,9 +21,23 @@ import org.hibernate.validator.constraints.CreditCardNumber;
 
 import lombok.Data;
 
+
 @Data
-public class Order {
+@Entity
+@Table(name="Taco_Order") //Order객체가 데이터베이스의 Taco_Order테이블에 저장되어야 한다는 것을 나타낸다.
+public class Order implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+	
+	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	private Long id;
+	private Date placedAt;
+	
+	@ManyToOne
+	private User user;
+	
+	@ManyToMany(targetEntity=Taco.class)
 	private List<Taco> tacos = new ArrayList<>();
 
 	@NotBlank(message="Name is required")
@@ -43,5 +67,10 @@ public class Order {
 	
 	public void addDesign(Taco design) {
 		this.tacos.add(design);
+	}
+	
+	@PrePersist
+	void placedAt() {
+		this.placedAt = new Date();
 	}
 }
